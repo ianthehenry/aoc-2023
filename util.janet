@@ -17,9 +17,6 @@
 (test (merge-with max {:a 1} {:b 2}) @{:a 1 :b 2})
 (test (merge-with max {:a 10} {:a 2}) @{:a 10})
 
-(defn zip-all [f a b]
-  (all |(f (in a $) (in b $)) (distinct [;(keys a) ;(keys b)])))
-
 (defn zip-all [f d a b]
   (all |(f (in a $ d) (in b $ d)) (distinct [;(keys a) ;(keys b)])))
 
@@ -32,3 +29,18 @@
 (test (peg/match (sep ~'"a" " ") "a") @["a"])
 (test (peg/match (sep ~'"a" " ") "a a aaa") @["a" "a" "a"])
 (test (peg/match (sep ~'"a" " ") "a a a") @["a" "a" "a"])
+
+(test (peg/match (sep ~(% (some '1)) " ") "one two three") @["one two three"])
+(test (peg/match (sep ~(% (some ',(^ " "))) " ") "one two three") @["one" "two" "three"])
+
+(defn incr [tab k]
+  (def cur (in tab k))
+  (if cur
+    (put tab k (+ cur 1))
+    (put tab k 1)))
+
+(defn push [tab k v]
+  (def cur (in tab k))
+  (if cur
+    (array/push cur v)
+    (put tab k @[v])))

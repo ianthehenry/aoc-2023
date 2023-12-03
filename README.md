@@ -9,5 +9,11 @@ $ jpm -l deps
 Run a solution:
 
 ```
-$ jpm -l janet 01.janet
+$ jpm_tree/bin/judge 01.janet
+```
+
+Run everything:
+
+```
+$ jpm_tree/bin/judge
 ```
