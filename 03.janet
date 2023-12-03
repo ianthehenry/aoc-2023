@@ -19,8 +19,7 @@
   :nothing (+ "." "\n")
   :symbol (/ (* (line) (column) '1) ,(fn [line col c] [:symbol [line col] c]))
   :number (/ (* (line) (column) (number :d+) (column)) ,(fn [line col-start num col-end]
-    [:number num [line col-start] [line col-end]]
-    ))
+    [:number num [line col-start] [line col-end]]))
   :main (some (+ :nothing :number :symbol))
   })
 
@@ -40,8 +39,7 @@
         (var adjacent false)
         (loop [line :range-to [(- start-line 1) (+ end-line 1)]
                col  :range-to [(- start-col 1) end-col]
-               :let [pos [line col] sym (in symbols pos)]
-               :when sym]
+               :when (in symbols [line col])]
           (set adjacent true))
         (if adjacent num 0))
       0))))
