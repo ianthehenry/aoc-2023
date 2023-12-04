@@ -33,11 +33,12 @@
 (test (peg/match (sep ~(% (some '1)) " ") "one two three") @["one two three"])
 (test (peg/match (sep ~(% (some ',(^ " "))) " ") "one two three") @["one" "two" "three"])
 
-(defn incr [tab k]
+(defn incr [tab k &opt by]
+  (default by 1)
   (def cur (in tab k))
   (if cur
-    (put tab k (+ cur 1))
-    (put tab k 1)))
+    (put tab k (+ cur by))
+    (put tab k by)))
 
 (defn push [tab k v]
   (def cur (in tab k))
