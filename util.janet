@@ -45,3 +45,5 @@
   (if cur
     (array/push cur v)
     (put tab k @[v])))
+
+(defn . [k] (fn [t] (in t k)))
