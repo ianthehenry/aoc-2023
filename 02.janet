@@ -56,7 +56,7 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
   (def possible-games (->> (peg/match peg input)
     (filter (fn [{:id id :rounds rounds}]
       (zip-all <= 0 (round-max rounds) {:red 12 :green 13 :blue 14})))))
-  (sum (map |($ :id) possible-games)))
+  (sum (map (. :id) possible-games)))
 
 (test (solve test-input) 8)
 (test (solve real-input) 2528)

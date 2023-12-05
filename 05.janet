@@ -133,7 +133,7 @@ humidity-to-location map:
 (test (transform {:src-start 30 :len 10 :dest-start 130} {:start 30 :len 10}) {:from 30 :len 10 :start 130})
 
 (defn unmapped-ranges [original-range mapped-ranges]
-  (sort-by |(in $ :from) mapped-ranges)
+  (sort-by (. :from) mapped-ranges)
   (def {:start start :len len} original-range)
   (def end (+ start len))
   (def result @[])

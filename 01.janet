@@ -25,7 +25,7 @@ treb7uchet
 
 (test (solve test-input) 142)
 
-(printf "part 1 = %d" (solve real-input))
+(test (solve real-input) 54951)
 
 ### part two
 
@@ -61,7 +61,7 @@ zoneight234
 (test (solve "twone") 21)
 (test (solve test-input) 281)
 
-(printf "part 2 = %d" (solve real-input))
+(test (solve real-input) 55218)
 
 (def single-peg ~{
   :digit (+
@@ -81,4 +81,4 @@ zoneight234
   :main (/ (group :lines) ,sum)
   })
 
-(printf "part 2 redux = %d" (first (peg/match single-peg real-input)))
+(test (first (peg/match single-peg real-input)) 55218)

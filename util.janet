@@ -46,4 +46,4 @@
     (array/push cur v)
     (put tab k @[v])))
 
-(defn . [k] (fn [t] (in t k)))
+(defn . [k &opt d] (fn [t] (in t k d)))
