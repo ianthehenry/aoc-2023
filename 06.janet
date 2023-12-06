@@ -28,8 +28,7 @@ Distance:  9  40  200
     (count |$ (seq
       [hold-time :range [0 (+ time 1)]
       :let [remaining (- time hold-time)
-            distance (* remaining hold-time)]
-      ]
+            distance (* remaining hold-time)]]
       (> distance dist))))))
 
 (test (solve test-input) 288)
@@ -38,14 +37,22 @@ Distance:  9  40  200
 (defn solve2 [input]
   (def [[{:time time :dist dist}]] (peg/match peg (string/replace-all " " "" input)))
   (var total 0)
-  (loop
-    [hold-time :range [0 (+ time 1)]
-    :let [remaining (- time hold-time)
-          distance (* remaining hold-time)]
-    :when (> distance dist)]
+  (loop [hold-time :range [0 (+ time 1)]
+         :let [remaining (- time hold-time)
+               distance (* remaining hold-time)]
+         :when (> distance dist)]
     (+= total 1))
   total)
 
 (test (solve2 test-input) 71503)
 # takes 750ms
 #(test (solve2 real-input) 42250895)
+
+(defn solve2 [input]
+  (def [[{:time time :dist dist}]] (peg/match peg (string/replace-all " " "" input)))
+  (def [lo hi] (solve-quadratic -1 time (- dist)))
+  # we're counting fence posts
+  (+ (- (next-smaller-integer hi) (next-larger-integer lo)) 1))
+
+(test (solve2 test-input) 71503)
+(test (solve2 real-input) 42250895)

@@ -47,3 +47,30 @@
     (put tab k @[v])))
 
 (defn . [k &opt d] (fn [t] (in t k d)))
+
+(defn next-larger-integer [x]
+  (def c (math/ceil x))
+  (if (= c x)
+    (+ x 1)
+    c))
+
+(test (next-larger-integer 5) 6)
+(test (next-larger-integer 5.5) 6)
+
+(defn next-smaller-integer [x]
+  (def f (math/floor x))
+  (if (= f x)
+    (- x 1)
+    f))
+
+(test (next-smaller-integer 5) 4)
+(test (next-smaller-integer 5.5) 5)
+
+(defn solve-quadratic [a b c]
+  (def root (math/sqrt (- (* b b) (* 4 a c))))
+  (def two-a (* 2 a))
+  [(/ (+ (- b) root) two-a)
+   (/ (- (- b) root) two-a)])
+
+(test (solve-quadratic 1 0 0) [0 0])
+(test (solve-quadratic -2 1 1) [-0.5 1])
