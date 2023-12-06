@@ -102,11 +102,15 @@ humidity-to-location map:
   @[{:len 14 :start 79}
     {:len 13 :start 55}])
 
+# returns [mapped-output [unmapped-ranges]]
 (defn transform [rule range]
   (def {:src-start rule-start :dest-start rule-dest-start :len rule-len} rule)
   (def rule-end (+ rule-start rule-len))
   (def {:start start :len len} range)
   (def end (+ start len))
+
+  (def left-missed {:start start :len (- (min rule-start end) start)})
+  (def right-missed {:start rule-end :len (- end rule-end)})
 
   (def new-start (max rule-start start))
   (def new-end (min rule-end end))
@@ -114,59 +118,52 @@ humidity-to-location map:
 
   (def offset (- new-start rule-start))
 
-  (if (> new-len 0)
-    {:start (+ rule-dest-start offset) :len new-len :from new-start}))
+  [(if (> new-len 0) {:start (+ rule-dest-start offset) :len new-len})
+   (filter |(> ($ :len) 0) [left-missed right-missed])])
 
 # range inside rule
-(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 32 :len 2}) {:from 32 :len 2 :start 132})
+(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 32 :len 2}) [{:len 2 :start 132} @[]])
 # rule inside range
-(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 20 :len 50}) {:from 30 :len 10 :start 130})
+(test (transform {:src-start 32 :len 10 :dest-start 130} {:start 20 :len 50})
+  [{:len 10 :start 130}
+   @[{:len 12 :start 20}
+     {:len 28 :start 42}]])
 # range before rule
-(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 20 :len 5}) nil)
+(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 20 :len 5}) [nil @[{:len 5 :start 20}]])
 # range after rule
-(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 40 :len 5}) nil)
+(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 40 :len 5}) [nil @[{:len 5 :start 40}]])
 # overlap left
-(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 25 :len 10}) {:from 30 :len 5 :start 130})
+(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 25 :len 9})
+  [{:len 4 :start 130}
+   @[{:len 5 :start 25}]])
 # overlap right
-(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 35 :len 10}) {:from 35 :len 5 :start 135})
+(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 35 :len 9})
+  [{:len 5 :start 135}
+   @[{:len 4 :start 40}]])
 # exact
-(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 30 :len 10}) {:from 30 :len 10 :start 130})
+(test (transform {:src-start 30 :len 10 :dest-start 130} {:start 30 :len 10}) [{:len 10 :start 130} @[]])
 
-(defn unmapped-ranges [original-range mapped-ranges]
-  (sort-by (. :from) mapped-ranges)
-  (def {:start start :len len} original-range)
-  (def end (+ start len))
-  (def result @[])
-  (var current start)
-  (each {:from from :len len} mapped-ranges
-    (when (not= from current)
-      (array/push result {:start current :len (- from current)}))
-    (set current (+ from len)))
-
-  (when (not= current end)
-    (array/push result {:start current :len (- end current)}))
-  result)
+(defn has-output? [[output new-inputs]]
+  (not= output nil))
 
 (defn transform-all [ranges rules]
-  (catseq [range :in ranges]
-    (def mapped-ranges
-      (seq [rule :in rules
-            :let [new-range (transform rule range)]
-            :when new-range]
-        new-range))
-    (array/concat mapped-ranges (unmapped-ranges range mapped-ranges))))
+  (expanding-map ranges (fn [range]
+    (or (find-map rules |(transform $ range) has-output?)
+      [range []]))))
 
-(test (transform-all [{:start 30 :len 10}] [{:src-start 30 :len 10 :dest-start 130}]) @[{:from 30 :len 10 :start 130}])
+(test (transform-all [{:start 30 :len 10}] [{:src-start 30 :len 10 :dest-start 130}]) @[{:len 10 :start 130}])
+
 (test (transform-all [{:start 30 :len 20}] [{:src-start 30 :len 5 :dest-start 130} {:src-start 40 :len 5 :dest-start 160}])
-  @[{:from 30 :len 5 :start 130}
-    {:from 40 :len 5 :start 160}
+  @[{:len 5 :start 130}
+    {:len 5 :start 160}
     {:len 5 :start 35}
     {:len 5 :start 45}])
+
 (test (transform-all
   [{:start 30 :len 10}]
   [{:src-start 25 :len 10 :dest-start 125} {:src-start 35 :len 10 :dest-start 235}])
-  @[{:from 30 :len 5 :start 130}
-    {:from 35 :len 5 :start 235}])
+  @[{:len 5 :start 130}
+    {:len 5 :start 235}])
 
 (defn solve2 [input]
   (def {:seeds seeds :maps maps} (first (peg/match peg input)))

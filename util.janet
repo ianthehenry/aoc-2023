@@ -74,3 +74,41 @@
 
 (test (solve-quadratic 1 0 0) [0 0])
 (test (solve-quadratic -2 1 1) [-0.5 1])
+
+(defn concat [args]
+  (array/concat @[] ;args))
+
+(test (concat [[1] [2]]) [0 0])
+
+(defn find-map [ind f pred]
+  (var result nil)
+  (each x ind
+    (def candidate (f x))
+    (when (pred candidate)
+      (set result candidate)
+      (break)))
+  result)
+
+(defn transpose [arr]
+  (map tuple ;arr))
+
+(test (transpose [[1 2] [3 4] [5 6]]) @[[1 3 5] [2 4 6]])
+
+# like map, but f returns a tuple of [output new-inputs-to-try].
+# it will not terminate until no new inputs are generated.
+(defn expanding-map [inputs f]
+  # f returns a list of outputs, and a list of further inputs to try
+  (def inputs (array/slice inputs))
+  (def outputs @[])
+
+  (var i 0)
+  (while (< i (length inputs))
+    (def [out new-inputs] (f (in inputs i)))
+    (array/push outputs out)
+    (array/concat inputs new-inputs)
+    (++ i))
+  outputs)
+
+(test (expanding-map [1 2 3] (fn [x]
+  [x
+   (if (= x 1) [4] [])])) @[1 2 3 4])
