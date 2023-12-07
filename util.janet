@@ -112,3 +112,39 @@
 (test (expanding-map [1 2 3] (fn [x]
   [x
    (if (= x 1) [4] [])])) @[1 2 3 4])
+
+(defn- comparing-helper [a b comparators]
+  (if (empty? comparators)
+    false
+    (case ((first comparators) a b)
+      -1 true
+      0 (comparing-helper a b (drop 1 comparators))
+      1 false)))
+
+(defn comparing [& comparators]
+  (fn [a b] (comparing-helper a b comparators)))
+
+(defn by [f &opt comparator]
+  (default comparator cmp)
+  (fn [a b] (comparator (f a) (f b))))
+
+(defn descending [comparator]
+  (fn [a b] (* -1 (comparator a b))))
+
+(defn cmp-each [a b &opt comparator]
+  (default comparator cmp)
+  (var result 0)
+  (each [a b] (map tuple a b)
+    (def c (comparator a b))
+    (when (not= 0 c)
+      (set result c)
+      (break)))
+  result)
+
+(test (cmp-each [1 2 3] [1 2 4]) -1)
+(test (cmp-each [1 2 4] [1 2 3]) 1)
+(test (cmp-each [1 3 4] [1 2 3]) 1)
+(test (cmp-each [1 2 3] [1 2 3]) 0)
+
+(test (cmp-each [1 2 3] [1 2 4] cmp) -1)
+(test (cmp-each [1 2 3] [1 2 4] (descending cmp)) 1)
