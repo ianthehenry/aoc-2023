@@ -78,7 +78,7 @@
 (defn concat [args]
   (array/concat @[] ;args))
 
-(test (concat [[1] [2]]) [0 0])
+(test (concat [[1] [2]]) @[1 2])
 
 (defn find-map [ind f pred]
   (var result nil)
@@ -148,3 +148,12 @@
 
 (test (cmp-each [1 2 3] [1 2 4] cmp) -1)
 (test (cmp-each [1 2 3] [1 2 4] (descending cmp)) 1)
+
+(def- core/string/split string/split)
+(defn string/split [str sep]
+  (if (empty? sep)
+    (map string/from-bytes str)
+    (core/string/split sep str)))
+
+(test (string/split "abc" "") @["a" "b" "c"])
+(test (string/split "abc" "b") @["a" "c"])
