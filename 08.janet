@@ -79,77 +79,37 @@ ZZZ = (ZZZ, ZZZ)
 (test (end? [0 0 "111A"]) false)
 (test (end? [0 0 "111Z"]) true)
 
-(defn graph-length [node instructions start-index]
-  (var cursor node)
+(defn graph-length [node instructions]
+  (def seen @{})
   (var steps 0)
-  (var cycle false)
-  (def visited @{})
-  (while (or (= steps 0) (not (end? cursor)))
-    (++ steps)
-    (def i (% (+ steps start-index) (length instructions)))
-    (when (in visited [cursor i])
-      (pp ["found cycle" (node 2)])
-      (set cycle true)
-      (break))
-    (put visited [cursor i] true)
+  (var cursor node)
+  (def lens @[])
+  (var i 0)
+
+  (while (not (seen [cursor i]))
     (def instruction (in instructions i))
-    (set cursor (in cursor instruction)))
-  (if cycle
-    nil
-    [steps cursor]))
 
-#(defn lengths [cursors]
-#  (set/of (seq [[len node] :in cursors] len)))
+    (when (end? cursor)
+      (array/push lens steps)
+      (set steps 0))
+    (put seen [cursor i] true)
 
-(defn lengths [cursors]
-  (seq [[len node] :in cursors] len))
-
-(defn different-lengths? [cursors]
-  (> (length (distinct (lengths cursors))) 1))
+    (++ steps)
+    (set i (% (+ i 1) (length instructions)))
+    (set cursor (cursor instruction)))
+  (assert (= (length (distinct lens)) 1)
+    "this puzzle is stupid because the solution relies on
+     the particular structure of the input which is not
+     defined anywhere and the fact that terminal states
+     cycle with the same length as the initial conditions
+     that reach them which is absolutely not true in
+     general and this whole thing is stupid")
+  (first lens))
 
 (defn solve2 [input]
   (def {:instructions instructions :graph graph} (parse-graph input))
-
-  (def x
-  (tabseq [node :in graph :when (start? node)]
-    node
-    (do
-    (def seen @{})
-    (var steps 0)
-    (var local-steps 0)
-    (var cursor node)
-    (def lens @[])
-
-    (while true
-      (def i (% steps (length instructions)))
-      (def instruction (in instructions i))
-
-      (when (seen [cursor i])
-        (break))
-
-      (when (end? cursor)
-        (array/push lens local-steps)
-        (set local-steps 0))
-      (put seen [cursor i] true)
-
-      (++ steps)
-      (++ local-steps)
-      (set cursor (cursor instruction)))
-
-    lens)))
-
-  (each lens x
-    (assert (= (length (distinct lens)) 1)
-      "this puzzle is stupid because the solution relies on
-       the particular structure of the input which is not
-       defined anywhere and the fact that terminal states
-       cycle with the same length as the initial conditions
-       that reach them which is absolutely not true in
-       general and this whole thing is stupid"))
-
-  # I really hate this puzzle
-  (reduce math/lcm 1
-    (seq [[[_ _ name] [len]] :pairs x] len)))
+  (reduce math/lcm 1 (seq [node :in graph :when (start? node)]
+    (graph-length node instructions))))
 
 (def test-input ```
 LR
