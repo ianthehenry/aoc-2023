@@ -157,3 +157,14 @@
 
 (test (string/split "abc" "") @["a" "b" "c"])
 (test (string/split "abc" "b") @["a" "c"])
+
+(defn windows [list]
+  (var result @[])
+  (for i 0 (- (length list) 1)
+    (array/push result [(list i) (list (+ i 1))]))
+  result)
+
+(test (windows [1 2 3]) @[[1 2] [2 3]])
+
+(defn uncurry [f] (fn [args] (f ;args)))
+(defn flip [f] (fn [a b] (f b a)))
