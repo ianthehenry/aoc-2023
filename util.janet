@@ -165,6 +165,22 @@
   result)
 
 (test (windows [1 2 3]) @[[1 2] [2 3]])
+(test (windows [1]) @[])
+(test (windows []) @[])
 
 (defn uncurry [f] (fn [args] (f ;args)))
 (defn flip [f] (fn [a b] (f b a)))
+
+(defn contains? [list needle]
+  (var result false)
+  (each x list
+    (when (= x needle)
+      (set result true)
+      (break)))
+  result)
+
+(test (contains? [1 2 3] 2) true)
+(test (contains? [1 2 3] 4) false)
+
+# works on sets
+(defn empty? [x] (= (length x) 0))
