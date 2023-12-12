@@ -207,3 +207,4 @@
              j :range [(+ i 1) len]
              :let [a (xs i) b (xs j)]]
     [a b]))
+
