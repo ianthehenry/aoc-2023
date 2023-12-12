@@ -40,6 +40,26 @@
 (defn valid-combinations [inputs group-lengths acc]
   (valid-combinations* inputs group-lengths acc @{}))
 
+# This looks nicer, but it's 6x slower(!) than the direct implementation above
+# (defmemo valid-combinations [inputs group-lengths acc]
+#   (pat/match inputs
+#     [] (pat/match [group-lengths acc]
+#       [[] 0] 1
+#       [[final []] (= final)] 1
+#       0)
+#     ["?" rest]
+#       (+ (valid-combinations ["." rest] group-lengths acc)
+#          (valid-combinations ["#" rest] group-lengths acc))
+#     ["." rest]
+#       (if (= 0 acc)
+#         (valid-combinations rest group-lengths 0)
+#         (pat/match group-lengths
+#           [(= acc) rest-group-lengths]
+#             (valid-combinations rest rest-group-lengths 0)
+#           0))
+#     ["#" rest]
+#       (valid-combinations rest group-lengths (inc acc))))
+
 (defn to-linked-list [iterable]
   (pat/match iterable
     [] []
@@ -77,17 +97,6 @@
     (def group-lengths (map scan-number (string/split group-lengths ",")))
     (options input group-lengths)))
 
-(defn solve2 [input]
-  (sum-loop [line :in (string/split input "\n") :unless (empty? line)]
-    (def [input group-lengths] (string/split line " "))
-    (def group-lengths (map scan-number (string/split group-lengths ",")))
-
-    (def input (string/join (seq [i :range [0 5]] input) "?"))
-    (def group-lengths (catseq [i :range [0 5]] group-lengths))
-
-    (options input group-lengths)
-    ))
-
 (def real-input (slurp "input/12.txt"))
 
 (test (solve test-input) 21)
@@ -110,5 +119,4 @@
 (test (solve2 test-input) 525152)
 
 # takes around 2.5s
-#(test (solve2 real-input) 17788038834112)
-
+(test (solve2 real-input) 17788038834112)

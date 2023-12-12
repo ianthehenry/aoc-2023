@@ -208,3 +208,26 @@
              :let [a (xs i) b (xs j)]]
     [a b]))
 
+(defmacro defmemo [name args & body]
+  (with-syms [$memo $f $result $args] ~(def ,name (do
+    (var ,name nil)
+    (defn ,$f ,args ,;body)
+    (var ,$memo @{})
+    (set ,name (fn [& ,$args]
+      (when-let [,$result (in ,$memo ,$args)]
+        (break ,$result))
+      (def ,$result (apply ,$f ,$args))
+      (put ,$memo ,$args ,$result)
+      ,$result))))))
+
+(test-macro (defmemo add [a b] (+ a b))
+  (def add (do (var add nil) (defn <1> [a b] (+ a b)) (var <2> @{}) (set add (fn [& <3>] (when-let [<4> (in <2> <3>)] (break <4>)) (def <4> (apply <1> <3>)) (put <2> <3> <4>) <4>)))))
+
+(defmemo add [a b] (+ a b))
+(test (add 1 2) 3)
+
+(test-macro (defmemo count [x] (if (= x 0) 0 (count (- x 1))))
+  (def count (do (var count nil) (defn <1> [x] (if (= x 0) 0 (count (- x 1)))) (var <2> @{}) (set count (fn [& <3>] (when-let [<4> (in <2> <3>)] (break <4>)) (def <4> (apply <1> <3>)) (put <2> <3> <4>) <4>)))))
+
+(defmemo count [x] (if (= x 0) 0 (count (- x 1))))
+(test (count 5) 0)
