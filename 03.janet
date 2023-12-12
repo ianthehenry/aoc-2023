@@ -28,11 +28,11 @@
   (def symbols @{})
   (def lines (peg/match peg input))
 
-(each line lines
+  (each line lines
     (match line
       [:symbol line col sym] (put symbols [line col] sym)))
 
-  (sum (seq [line :in lines]
+  (sum-loop [line :in lines]
     (match line
       [:number line start-col num end-col] (do
         (var adjacent false)
@@ -41,7 +41,7 @@
                :when (in symbols [line col])]
           (set adjacent true))
         (if adjacent num 0))
-      0))))
+      0)))
 
 (test (solve test-input) 4361)
 

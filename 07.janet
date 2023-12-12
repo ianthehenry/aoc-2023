@@ -69,8 +69,8 @@ QQQJA 483
     (sorted (peg/match peg input) (comparing
       (by (. :hand) (by hand-strength))
       (by (. :hand) break-tie))))
-  (sum (seq [[i {:bid bid}] :pairs plays]
-    (* (+ i 1) bid))))
+  (sum-loop [[i {:bid bid}] :pairs plays]
+    (* (+ i 1) bid)))
 
 (test (solve test-input) 6440)
 (test (solve real-input) 256448566)
@@ -108,8 +108,8 @@ QQQJA 483
       (by (. :hand) (by hand-strength))
       (by (. :hand) break-tie))))
 
-  (sum (seq [[i {:bid bid}] :pairs plays]
-    (* (+ i 1) bid))))
+  (sum-loop [[i {:bid bid}] :pairs plays]
+    (* (+ i 1) bid)))
 
 (test (solve2 test-input) 5905)
 (test (solve2 real-input) 254412181)

@@ -23,11 +23,11 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 (def real-input (slurp "input/04.txt"))
 
 (defn solve [input]
-  (sum (seq [[_ winners choices] :in (peg/match peg input)]
+  (sum-loop [[_ winners choices] :in (peg/match peg input)]
     (def winners (length (* (set/of winners) (set/of choices))))
     (if (= winners 0)
       0
-      (math/pow 2 (- winners 1))))))
+      (math/pow 2 (- winners 1)))))
 
 (test (solve test-input) 13)
 (test (solve real-input) 19135)

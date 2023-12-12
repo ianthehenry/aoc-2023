@@ -38,8 +38,8 @@
 (defn solve [input]
   (def x (map differences-rec (peg/match peg input)))
 
-  (sum (seq [diffs :in x]
-    (extend diffs 0 +))))
+  (sum-loop [diffs :in x]
+    (extend diffs 0 +)))
 
 (test (solve test-input) 114)
 (test (solve real-input) 1953784198)
@@ -47,8 +47,8 @@
 (defn solve2 [input]
   (def x (map differences-rec (peg/match peg input)))
 
-  (sum (seq [diffs :in x]
-    (extend (map reverse diffs) 0 -))))
+  (sum-loop [diffs :in x]
+    (extend (map reverse diffs) 0 -)))
 
 (test (solve2 test-input) 2)
 (test (solve2 real-input) 957)

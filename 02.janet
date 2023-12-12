@@ -62,8 +62,8 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 (test (solve real-input) 2528)
 
 (defn solve2 [input]
-  (sum (seq [{:id id :rounds rounds} :in (peg/match peg input)]
-    (product (round-max rounds)))))
+  (sum-loop [{:id id :rounds rounds} :in (peg/match peg input)]
+    (product (round-max rounds))))
 
 (test (solve2 test-input) 2286)
 (test (solve2 real-input) 67363)

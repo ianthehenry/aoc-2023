@@ -188,3 +188,22 @@
 (defn manhattan-distance [[l1 c1] [l2 c2]]
   (+ (math/abs (- l1 l2))
      (math/abs (- c1 c2))))
+
+(defmacro sum-loop [rules & body]
+  (with-syms [$sum] ~(do
+    (var ,$sum 0)
+    (loop ,rules (+= ,$sum (do ,;body)))
+    ,$sum)))
+
+(defn count-while [f xs]
+  (sum-loop [x :in xs :while (f x)] 1))
+
+(defmacro lazy-seq [rules & body]
+  ~(coro (loop ,rules (yield (do ,;body)))))
+
+(defn unordered-pairs [xs]
+  (def len (length xs))
+  (lazy-seq [i :range [0 len]
+             j :range [(+ i 1) len]
+             :let [a (xs i) b (xs j)]]
+    [a b]))
