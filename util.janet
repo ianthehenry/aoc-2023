@@ -184,3 +184,7 @@
 
 # works on sets
 (defn empty? [x] (= (length x) 0))
+
+(defn manhattan-distance [[l1 c1] [l2 c2]]
+  (+ (math/abs (- l1 l2))
+     (math/abs (- c1 c2))))

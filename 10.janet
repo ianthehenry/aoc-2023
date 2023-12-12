@@ -155,10 +155,6 @@ LJ...
     (set/new p (east p))
     (set/new p (west p))))
 
-(defn manhattan-distance [[l1 c1] [l2 c2]]
-  (+ (math/abs (- l1 l2))
-     (math/abs (- c1 c2))))
-
 (defn adjacent? [p1 p2]
   (= (manhattan-distance p1 p2) 1))
 
