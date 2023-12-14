@@ -231,3 +231,15 @@
 
 (defmemo count [x] (if (= x 0) 0 (count (- x 1))))
 (test (count 5) 0)
+
+(defn put* [tab k v]
+  (put tab k v)
+  v)
+
+(defn multinvert [tab]
+  (def result @{})
+  (eachp [v k] tab
+    (array/push (or (in result k) (put* result k @[])) v))
+  result)
+
+(test (multinvert {:a 3 :b 2 :c 3}) @{2 @[:b] 3 @[:c :a]})
