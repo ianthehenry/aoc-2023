@@ -1,6 +1,7 @@
 (use judge)
 (use ./util)
 (import pat)
+(use cmp/import)
 
 (def test-input ```
 32T3K 765
@@ -54,10 +55,7 @@ QQQJA 483
 
 (def real-input (slurp "input/07.txt"))
 
-(defn break-tie [hand1 hand2]
-  (cmp-each
-    (map card-strength hand1)
-    (map card-strength hand2)))
+(def break-tie (cmp/each (by card-strength)))
 
 (test (break-tie ["A" "2"] ["K" "2"]) 1)
 (test (break-tie ["A" "2"] ["A" "2"]) 0)
@@ -66,9 +64,9 @@ QQQJA 483
 
 (defn solve [input]
   (def plays
-    (sorted (peg/match peg input) (comparing
-      (by (. :hand) (by hand-strength))
-      (by (. :hand) break-tie))))
+    (cmp/sorted (peg/match peg input)
+      (by :hand (by hand-strength))
+      (by :hand break-tie)))
   (sum-loop [[i {:bid bid}] :pairs plays]
     (* (+ i 1) bid)))
 
@@ -86,10 +84,7 @@ QQQJA 483
     "A" 14
     c (scan-number c)))
 
-(defn break-tie [hand1 hand2]
-  (cmp-each
-    (map card-strength hand1)
-    (map card-strength hand2)))
+(def break-tie (cmp/each (by card-strength)))
 
 (defn hand-strength [hand]
   (def without-jokers (filter |(not= $ "J") hand))
@@ -104,9 +99,9 @@ QQQJA 483
 
 (defn solve2 [input]
   (def plays
-    (sorted (peg/match peg input) (comparing
-      (by (. :hand) (by hand-strength))
-      (by (. :hand) break-tie))))
+    (cmp/sorted (peg/match peg input)
+      (by :hand (by hand-strength))
+      (by :hand break-tie)))
 
   (sum-loop [[i {:bid bid}] :pairs plays]
     (* (+ i 1) bid)))

@@ -121,34 +121,6 @@
       0 (comparing-helper a b (drop 1 comparators))
       1 false)))
 
-(defn comparing [& comparators]
-  (fn [a b] (comparing-helper a b comparators)))
-
-(defn by [f &opt comparator]
-  (default comparator cmp)
-  (fn [a b] (comparator (f a) (f b))))
-
-(defn descending [comparator]
-  (fn [a b] (* -1 (comparator a b))))
-
-(defn cmp-each [a b &opt comparator]
-  (default comparator cmp)
-  (var result 0)
-  (each [a b] (map tuple a b)
-    (def c (comparator a b))
-    (when (not= 0 c)
-      (set result c)
-      (break)))
-  result)
-
-(test (cmp-each [1 2 3] [1 2 4]) -1)
-(test (cmp-each [1 2 4] [1 2 3]) 1)
-(test (cmp-each [1 3 4] [1 2 3]) 1)
-(test (cmp-each [1 2 3] [1 2 3]) 0)
-
-(test (cmp-each [1 2 3] [1 2 4] cmp) -1)
-(test (cmp-each [1 2 3] [1 2 4] (descending cmp)) 1)
-
 (def- core/string/split string/split)
 (defn string/split [str sep]
   (if (empty? sep)
@@ -223,14 +195,15 @@
 (test-macro (defmemo add [a b] (+ a b))
   (def add (do (var add nil) (defn <1> [a b] (+ a b)) (var <2> @{}) (set add (fn [& <3>] (when-let [<4> (in <2> <3>)] (break <4>)) (def <4> (apply <1> <3>)) (put <2> <3> <4>) <4>)))))
 
-(defmemo add [a b] (+ a b))
-(test (add 1 2) 3)
+(do
+  (defmemo add [a b] (+ a b))
+  (test (add 1 2) 3)
 
-(test-macro (defmemo count [x] (if (= x 0) 0 (count (- x 1))))
-  (def count (do (var count nil) (defn <1> [x] (if (= x 0) 0 (count (- x 1)))) (var <2> @{}) (set count (fn [& <3>] (when-let [<4> (in <2> <3>)] (break <4>)) (def <4> (apply <1> <3>)) (put <2> <3> <4>) <4>)))))
+  (test-macro (defmemo count [x] (if (= x 0) 0 (count (- x 1))))
+    (def count (do (var count nil) (defn <1> [x] (if (= x 0) 0 (count (- x 1)))) (var <2> @{}) (set count (fn [& <3>] (when-let [<4> (in <2> <3>)] (break <4>)) (def <4> (apply <1> <3>)) (put <2> <3> <4>) <4>)))))
 
-(defmemo count [x] (if (= x 0) 0 (count (- x 1))))
-(test (count 5) 0)
+  (defmemo count [x] (if (= x 0) 0 (count (- x 1))))
+  (test (count 5) 0))
 
 (defn put* [tab k v]
   (put tab k v)

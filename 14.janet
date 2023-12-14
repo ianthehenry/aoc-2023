@@ -187,4 +187,4 @@ O.#..O.#.#
 (test (solve2 (board/parse test-input)) 64)
 
 # takes around 6s
-(test (solve2 (board/parse real-input)) 97241)
+#(test (solve2 (board/parse real-input)) 97241)

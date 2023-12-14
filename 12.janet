@@ -119,4 +119,4 @@
 (test (solve2 test-input) 525152)
 
 # takes around 2.5s
-(test (solve2 real-input) 17788038834112)
+#(test (solve2 real-input) 17788038834112)
