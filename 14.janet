@@ -146,9 +146,15 @@ O.#..O.#.#
 (test (solve test-input) 136)
 (test (solve real-input) 103333)
 
-(defn board/signature [board] (set/of (keys (board :rocks))))
+# this is a bit faster than using the set of rocks
+(defn board/signature [{:rocks rocks :bounds [w h]}]
+  (def buf (buffer/new (* w h)))
+  (for l 0 h
+    (for c 0 w
+      (buffer/push-byte buf (if (rocks [l c]) (chr "O") (chr ".")))))
+  (string/slice buf))
 
-(test (board/signature (board/parse test-input)) "{(9 1) (4 1) (4 7) (3 1) (6 2) (9 2) (5 5) (1 3) (3 9) (6 6) (7 7) (3 0) (3 4) (5 0) (0 0) (6 9) (1 2) (1 0)}")
+(test (board/signature (board/parse test-input)) "O.........O.OO................OO..O....O.O.....O..O....O......O...O..O.......O.............OO.......")
 
 # mutates its input!
 # the returned board will be at the beginning of its cycle
@@ -172,19 +178,13 @@ O.#..O.#.#
 (defn solve2 [board]
   (def [steps-taken cycle-start]
     (unique-board-cycles board))
-
   (def cycle-length (- steps-taken cycle-start))
-
   (def target-steps 1000000000)
-  (def pre-cycle-steps (- steps-taken cycle-length))
-  (def periods (div (- target-steps pre-cycle-steps) cycle-length))
-  (def final-extra-steps (- target-steps pre-cycle-steps (* cycle-length periods)))
-
-  (for i 0 final-extra-steps
+  (for i 0 (% (- target-steps steps-taken) cycle-length)
     (board/cycle board))
   (board/calculate-load board))
 
 (test (solve2 (board/parse test-input)) 64)
 
-# takes around 6s
-#(test (solve2 (board/parse real-input)) 97241)
+# takes around 5s
+# (test (solve2 (board/parse real-input)) 97241)
