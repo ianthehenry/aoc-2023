@@ -42,10 +42,6 @@ O.#..O.#.#
   (put rocks to true)
   nil)
 
-(defn vec+ [[x1 y1] [x2 y2]] [(+ x1 x2) (+ y1 y2)])
-(defmacro vec+= [v1 v2]
-  ~(set ,v1 (,vec+ ,v1 ,v2)))
-
 (defn board/tilt [board dir comparator]
   (def rocks-by-line (cmp/sort (keys (board :rocks)) comparator))
 

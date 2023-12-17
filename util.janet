@@ -216,3 +216,35 @@
   result)
 
 (test (multinvert {:a 3 :b 2 :c 3}) @{2 @[:b] 3 @[:c :a]})
+
+(defn grid/parse [input]
+  (def lines (string/split (string/trim input) "\n"))
+  (def rows (length lines))
+  (def cols (length (first lines)))
+  {:contents (mapcat |(string/split $ "") lines) :size [rows cols]})
+
+(defn grid/contents [grid]
+  (grid :contents))
+
+(defn grid/contains? [{:size [rows cols]} [row col]]
+  (and
+    (>= row 0)
+    (>= col 0)
+    (< row rows)
+    (< col cols)))
+
+(defn grid/get [grid p]
+  (if (grid/contains? grid p)
+    (let [[row col] p {:contents contents :size [rows cols]} grid]
+      (contents (+ (* cols row) col)))))
+
+(defn grid/map [{:contents contents :size size} f]
+  {:contents (map f contents) :size size})
+
+(defn non [f] (fn [x] (not (f x))))
+
+(defn vec+ [[x1 y1] [x2 y2]] [(+ x1 x2) (+ y1 y2)])
+(defmacro vec+= [v1 v2]
+  ~(set ,v1 (,vec+ ,v1 ,v2)))
+(defmacro max= [v x]
+  ~(set ,v (,max ,v ,x)))
