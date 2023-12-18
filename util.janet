@@ -256,7 +256,20 @@
 (defn vec+ [[x1 y1] [x2 y2]] [(+ x1 x2) (+ y1 y2)])
 (defmacro vec+= [v1 v2]
   ~(set ,v1 (,vec+ ,v1 ,v2)))
+(defn vec*n [[x1 y1] s] [(* x1 s) (* y1 s)])
+(defmacro vec*n= [v1 s]
+  ~(set ,v1 (,vec*n ,v1 ,s)))
 (defmacro max= [v x]
   ~(set ,v (,max ,v ,x)))
 (defmacro min= [v x]
   ~(set ,v (,min ,v ,x)))
+
+(def pred dec)
+(def succ inc)
+
+(defn area-of [vertices]
+  (* 0.5
+    (sum-loop [i :range [0 (pred (length vertices))]]
+      (def [x1 y1] (vertices i))
+      (def [x2 y2] (vertices (succ i)))
+      (* (+ y1 y2) (- x1 x2)))))
