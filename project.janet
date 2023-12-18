@@ -7,4 +7,5 @@
      "https://github.com/ianthehenry/pat.git"
      "https://github.com/ianthehenry/jimmy.git"
      "https://github.com/ianthehenry/cmp.git"
+     "https://github.com/ianthehenry/heap.git"
      ])

@@ -2,7 +2,7 @@
 (use ./util)
 (use cmp/import)
 (import pat)
-(import ./heap)
+(import heap)
 
 (def real-input (slurp "input/17.txt"))
 
@@ -57,13 +57,14 @@
   (def start (grid/top-left grid))
   (def goal (grid/bottom-right grid))
   (def cheapest-path @{})
-  (def priors @{})
 
   (def shore (heap/new (by (fn [state]
     (+ (cheapest-path state) (manhattan-distance (state 0) goal))))))
+  (def shore-set @{})
 
   (def initial-state [start east 0])
   (put cheapest-path initial-state 0)
+  (put shore-set initial-state true)
   (heap/push shore initial-state)
 
   (defn final? [[pos dir age]]
@@ -72,6 +73,7 @@
   (var final-state nil)
   (while true
     (def current (heap/pop-min shore))
+    (put shore-set current nil)
     (when (final? current)
       (set final-state current)
       (break))
@@ -81,22 +83,9 @@
       (def cost (+ current-cost edge-cost))
       (when (better? cheapest-path neighbor cost)
         (put cheapest-path neighbor cost)
-        #(put priors neighbor current)
-        (unless (heap/contains? shore neighbor)
-          (heap/push shore neighbor)))))
-
-  #(def path @[])
-  #(var cursor final-state)
-  #(while (not= cursor initial-state)
-  #  (array/push path cursor)
-  #  (set cursor (priors cursor)))
-  #(def canvas (grid/map grid (fn [_] ".")))
-  #(each [pos dir _] path
-  #  (grid/set canvas pos (dir/to-string dir)))
-  #(loop [:let [[rows cols] (canvas :size)]
-  #       row :range [0 rows] :after (print)
-  #       col :range [0 cols]]
-  #  (prin (grid/get canvas [row col])))
+        (unless (has-key? shore-set neighbor)
+          (heap/push shore neighbor)
+          (put shore-set neighbor true)))))
 
   (cheapest-path final-state))
 
@@ -105,7 +94,7 @@
 
 (test (solve test-input) 102)
 
-# takes 12s
+# takes 6s
 #(test (solve real-input) 886)
 
 (defn solve2 [input]
@@ -118,9 +107,8 @@
 999999999991
 999999999991
 999999999991
-999999999991
-`)
+999999999991`)
   71)
 
-# takes 1m23s
+# takes 22s
 #(test (solve2 real-input) 1055)
