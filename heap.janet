@@ -129,7 +129,7 @@
 
 (defn- max-index [heap]
   (var best 1)
-  (loop [i :range-to [2 3] :when (heap/> heap i best)]
+  (loop [i :range-to [2 3] :when (and (has-index? heap i) (heap/> heap i best))]
     (set best i))
   best)
 
@@ -165,9 +165,19 @@
 (defn pop-min [heap & extra] (pop-helper heap extra min-index))
 (defn pop-max [heap & extra] (pop-helper heap extra max-index))
 
-# TODO: this can be much more efficient
 (defn contains? [heap needle]
   (has-value? (heap 0) needle))
+
+(deftest "contains"
+  (def heap (new cmp))
+  (test (contains? heap 10) false)
+  (push heap 1)
+  (test (contains? heap 10) false)
+  (test (contains? heap 1) true)
+  (push heap 10)
+  (test (contains? heap 10) true)
+  (test (pop-max heap) 10)
+  (test (contains? heap 10) false))
 
 (deftest "general heap operations"
   (def heap (new cmp))
@@ -185,10 +195,10 @@
   (test (pop-max heap) 40)
   (test (peek-min heap) 28)
   (test (peek-max heap) 34)
-  (test (contains? heap 34) 34)
-  (test (contains? heap 50) 34)
+  (test (contains? heap 34) true)
+  (test (contains? heap 50) false)
   (push heap 50)
-  (test (contains? heap 50) 34)
+  (test (contains? heap 50) true)
   (test (pop-max heap) 50)
   (test (peek-max heap) 34)
 

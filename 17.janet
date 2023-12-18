@@ -113,9 +113,6 @@
 
 (test (solve2 test-input) 94)
 
-# takes 2m35s with my dumbo priority queue
-#(test (solve2 real-input) 886)
-
 (test (solve2 `
 111111111111
 999999999991
@@ -125,5 +122,5 @@
 `)
   71)
 
-# takes like a minute
+# takes 1m23s
 #(test (solve2 real-input) 1055)
