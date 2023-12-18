@@ -238,8 +238,18 @@
     (let [[row col] p {:contents contents :size [rows cols]} grid]
       (contents (+ (* cols row) col)))))
 
+(defn grid/set [grid p x]
+  (if (grid/contains? grid p)
+    (let [[row col] p {:contents contents :size [rows cols]} grid]
+      (set (contents (+ (* cols row) col)) x))))
+
 (defn grid/map [{:contents contents :size size} f]
   {:contents (map f contents) :size size})
+
+(defn grid/top-left [_]
+  [0 0])
+(defn grid/bottom-right [{:size [rows cols]}]
+  [(- rows 1) (- cols 1)])
 
 (defn non [f] (fn [x] (not (f x))))
 
@@ -248,3 +258,5 @@
   ~(set ,v1 (,vec+ ,v1 ,v2)))
 (defmacro max= [v x]
   ~(set ,v (,max ,v ,x)))
+(defmacro min= [v x]
+  ~(set ,v (,min ,v ,x)))
