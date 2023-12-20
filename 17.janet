@@ -58,8 +58,7 @@
   (def goal (grid/bottom-right grid))
   (def cheapest-path @{})
 
-  (def shore (heap/new (by (fn [state]
-    (+ (cheapest-path state) (manhattan-distance (state 0) goal))))))
+  (def shore (heap/new (by cheapest-path)))
   (def shore-set @{})
 
   (def initial-state [start east 0])
@@ -94,7 +93,7 @@
 
 (test (solve test-input) 102)
 
-# takes 6s
+# takes 4s
 #(test (solve real-input) 886)
 
 (defn solve2 [input]
@@ -110,5 +109,5 @@
 999999999991`)
   71)
 
-# takes 22s
+# takes 17s
 #(test (solve2 real-input) 1055)
