@@ -36,15 +36,15 @@
   (seq [next-dir :in dirs
         :when (or (>= age min-age) (= dir next-dir))
         :when (not= next-dir (dir/inv dir))
-        :let [next-age (if (= dir next-dir) (+ age 1) 0)]
-        :when (< next-age max-age)
+        :let [next-age (if (= dir next-dir) (+ age 1) 1)]
+        :when (<= next-age max-age)
         :let [next-pos (vec+ pos next-dir)]
         :when (grid/contains? grid next-pos)]
     [next-pos next-dir next-age]))
 
 (def test-grid (grid/parse test-input))
 
-(test (neighbors test-grid [[0 0] east 0] -1 3) @[[[1 0] [1 0] 0] [[0 1] [0 1] 1]])
+(test (neighbors test-grid [[0 0] east 0] 0 3) @[[[1 0] [1 0] 1] [[0 1] [0 1] 1]])
 (test (neighbors test-grid [[0 0] east 0] 4 10) @[[[0 1] [0 1] 1]])
 
 (defn better? [t k v]
@@ -97,7 +97,7 @@
 #(test (solve real-input) 886)
 
 (defn solve2 [input]
-  (shortest input 3 10))
+  (shortest input 4 10))
 
 (test (solve2 test-input) 94)
 
