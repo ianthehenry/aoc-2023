@@ -217,6 +217,12 @@
 
 (test (multinvert {:a 3 :b 2 :c 3}) @{2 @[:b] 3 @[:c :a]})
 
+(def grid/up [-1 0])
+(def grid/down [1 0])
+(def grid/left [0 -1])
+(def grid/right [0 1])
+(def grid/dirs [grid/up grid/down grid/left grid/right])
+
 (defn grid/parse [input]
   (def lines (string/split (string/trim input) "\n"))
   (def rows (length lines))
@@ -242,6 +248,10 @@
   (if (grid/contains? grid p)
     (let [[row col] p {:contents contents :size [rows cols]} grid]
       (set (contents (+ (* cols row) col)) x))))
+
+(defn grid/find [{:contents contents :size [rows cols]} f]
+  (if-let [index (find-index f contents)]
+    [(div index rows) (mod index rows)]))
 
 (defn grid/map [{:contents contents :size size} f]
   {:contents (map f contents) :size size})
