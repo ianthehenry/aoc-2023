@@ -29,11 +29,6 @@ broadcaster -> a
     :sigil (+ (/ "&" :and) (/ "%" :ff) (constant :init))
     :main (some (* :rule (? "\n")))})
 
-(defn ref/new [value] @[value])
-(defn ref/set [ref value] (set (ref 0) value))
-(defn ref/get [ref] (ref 0))
-(defn ref/update [ref f] (ref/set ref (f (ref/get ref))))
-
 (defn deq/new [capacity]
   @[0 0 (array/new-filled capacity nil)])
 

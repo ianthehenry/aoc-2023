@@ -87,7 +87,6 @@
     #  (prin (if occupied "O" (if passable "." "#"))))
     #(print)
 
-
     (loop [R :range-to [-4 4] :after (print)
            C :range-to [-4 4]
            :let [sector [R C]]]

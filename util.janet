@@ -40,7 +40,7 @@
     (put tab k (+ cur by))
     (put tab k by)))
 
-(defn push [tab k v]
+(defn table/push [tab k v]
   (def cur (in tab k))
   (if cur
     (array/push cur v)
@@ -180,6 +180,18 @@
              :let [a (xs i) b (xs j)]]
     [a b]))
 
+(defn smuggle [x] ~(,(fn [] x)))
+
+(defmacro module [name & body]
+  (def env (make-env (curenv)))
+  (def inputs (lazy-seq [form :in body] form))
+  (run-context {
+    :env env
+    :read (fn [env source]
+      (def form (resume inputs))
+      (if form form (do (put env :exit true) nil)))})
+  ~(,merge-module (,curenv) ,(smuggle env) ,(string name "/") true))
+
 (defmacro defmemo [name args & body]
   (with-syms [$memo $f $result $args] ~(def ,name (do
     (var ,name nil)
@@ -217,62 +229,77 @@
 
 (test (multinvert {:a 3 :b 2 :c 3}) @{2 @[:b] 3 @[:c :a]})
 
-(def grid/up [-1 0])
-(def grid/down [1 0])
-(def grid/left [0 -1])
-(def grid/right [0 1])
-(def grid/dirs [grid/up grid/down grid/left grid/right])
+(defn many-many-invert [tab]
+  (def result @{})
+  (eachp [v ks] tab
+    (each k ks
+      (array/push (or (in result k) (put* result k @[])) v)))
+  result)
 
-(defn grid/parse [input]
-  (def lines (string/split (string/trim input) "\n"))
-  (def rows (length lines))
-  (def cols (length (first lines)))
-  {:contents (mapcat |(string/split $ "") lines) :size [rows cols]})
+(test (many-many-invert {:a [3 2] :b [2] :c [3 1]}) @{1 @[:c] 2 @[:a :b] 3 @[:c :a]})
 
-(defn grid/contents [grid]
-  (grid :contents))
+(module grid
+  (def up [-1 0])
+  (def down [1 0])
+  (def left [0 -1])
+  (def right [0 1])
+  (def dirs [up down left right])
 
-(defn grid/contains? [{:size [rows cols]} [row col]]
-  (and
-    (>= row 0)
-    (>= col 0)
-    (< row rows)
-    (< col cols)))
+  (defn parse [input]
+    (def lines (string/split (string/trim input) "\n"))
+    (def rows (length lines))
+    (def cols (length (first lines)))
+    {:contents (mapcat |(string/split $ "") lines) :size [rows cols]})
 
-(defn grid/get [grid p]
-  (if (grid/contains? grid p)
-    (let [[row col] p {:contents contents :size [rows cols]} grid]
-      (contents (+ (* cols row) col)))))
+  (defn contents [grid]
+    (grid :contents))
 
-(defn grid/set [grid p x]
-  (if (grid/contains? grid p)
-    (let [[row col] p {:contents contents :size [rows cols]} grid]
-      (set (contents (+ (* cols row) col)) x))))
+  (defn contains? [{:size [rows cols]} [row col]]
+    (and
+      (>= row 0)
+      (>= col 0)
+      (< row rows)
+      (< col cols)))
 
-(defn grid/find [{:contents contents :size [rows cols]} f]
-  (if-let [index (find-index f contents)]
-    [(div index rows) (mod index rows)]))
+  (defn get [grid p]
+    (if (contains? grid p)
+      (let [[row col] p {:contents contents :size [rows cols]} grid]
+        (contents (+ (* cols row) col)))))
 
-(defn grid/map [{:contents contents :size size} f]
-  {:contents (map f contents) :size size})
+  (defn set [grid p x]
+    (if (contains? grid p)
+      (let [[row col] p {:contents contents :size [rows cols]} grid]
+        (set (contents (+ (* cols row) col)) x))))
 
-(defn grid/top-left [_]
-  [0 0])
-(defn grid/bottom-right [{:size [rows cols]}]
-  [(- rows 1) (- cols 1)])
+  (defn find [{:contents contents :size [rows cols]} f]
+    (if-let [index (find-index f contents)]
+      [(div index rows) (mod index rows)]))
+
+  (def- core/map map)
+  (defn map [{:contents contents :size size} f]
+    {:contents (core/map f contents) :size size})
+
+  (defn top-left [_]
+    [0 0])
+
+  (defn bottom-right [{:size [rows cols]}]
+    [(- rows 1) (- cols 1)]))
 
 (defn non [f] (fn [x] (not (f x))))
 
-(defn vec+ [[x1 y1] [x2 y2]] [(+ x1 x2) (+ y1 y2)])
-(defmacro vec+= [v1 v2]
-  ~(set ,v1 (,vec+ ,v1 ,v2)))
-(defn vec*n [[x1 y1] s] [(* x1 s) (* y1 s)])
+(defn vec+ [& vs] (tuple/slice (map + ;vs)))
+(defmacro vec+= [v & vs]
+  ~(set ,v (,vec+ ,v ,;vs)))
+(defn vec*n [v s] (tuple/slice (map |(* s $) v)))
 (defmacro vec*n= [v1 s]
   ~(set ,v1 (,vec*n ,v1 ,s)))
-(defmacro max= [v x]
-  ~(set ,v (,max ,v ,x)))
-(defmacro min= [v x]
-  ~(set ,v (,min ,v ,x)))
+
+(test (vec+ [1 2 3] [4 5 6] [0 0 1]) [5 7 10])
+
+(defmacro max= [v & xs]
+  ~(set ,v (,max ,v ,;xs)))
+(defmacro min= [v & xs]
+  ~(set ,v (,min ,v ,;xs)))
 
 (def pred dec)
 (def succ inc)
@@ -283,3 +310,11 @@
       (def [x1 y1] (vertices i))
       (def [x2 y2] (vertices (succ i)))
       (* (+ y1 y2) (- x1 x2)))))
+
+(defn ref/new [value] @[value])
+(defn ref/set [ref value] (set (ref 0) value))
+(defn ref/get [ref] (ref 0))
+(defn ref/update [ref f] (ref/set ref (f (ref/get ref))))
+
+(defn filter-map [f xs]
+  (filter |(not= nil $) (map f xs)))

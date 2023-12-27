@@ -76,7 +76,7 @@
                col  :range-to [(- start-col 1) end-col]
                :let [pos [line col] sym (in symbols pos)]
                :when (= sym "*")]
-          (push gear-incidents pos num)))))
+          (table/push gear-incidents pos num)))))
 
   (sum (seq [nums :in gear-incidents]
     (pat/match nums [a b] (* a b) 0))))
