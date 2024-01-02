@@ -306,13 +306,28 @@
 (defn non [f] (fn [x] (not (f x))))
 
 (defn vec+ [& vs] (tuple/slice (map + ;vs)))
+(defn vec- [& vs] (tuple/slice (map - ;vs)))
 (defmacro vec+= [v & vs]
   ~(set ,v (,vec+ ,v ,;vs)))
+(defmacro vec-= [v & vs]
+  ~(set ,v (,vec- ,v ,;vs)))
 (defn vec*n [v s] (tuple/slice (map |(* s $) v)))
 (defmacro vec*n= [v1 s]
   ~(set ,v1 (,vec*n ,v1 ,s)))
 
 (test (vec+ [1 2 3] [4 5 6] [0 0 1]) [5 7 10])
+
+(defn vec/dot [v1 v2]
+  (sum (map * v1 v2)))
+(defn vec/mag [v]
+  (math/sqrt (vec/dot v v)))
+(defn vec/normalize [[x y]]
+  (let [mag-squared (+ (* x x) (* y y))]
+    (if (= mag-squared 0)
+      [0 0]
+      (let [mag (math/sqrt mag-squared)
+            magi (/ mag)]
+        [(* x magi) (* y magi)]))))
 
 (defmacro max= [v & xs]
   ~(set ,v (,max ,v ,;xs)))
