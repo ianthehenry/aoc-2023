@@ -244,6 +244,7 @@
   (def left [0 -1])
   (def right [0 1])
   (def dirs [up down left right])
+  (defn adjacent [[r c]] [[(+ r 1) c] [(- r 1) c] [r (+ c 1)] [r (- c 1)]])
 
   (defn parse [input]
     (def lines (string/split (string/trim input) "\n"))
@@ -261,12 +262,12 @@
       (< row rows)
       (< col cols)))
 
-  (defn get [grid p]
+  (defn get- [grid p]
     (if (contains? grid p)
       (let [[row col] p {:contents contents :size [rows cols]} grid]
         (contents (+ (* cols row) col)))))
 
-  (defn set [grid p x]
+  (defn set- [grid p x]
     (if (contains? grid p)
       (let [[row col] p {:contents contents :size [rows cols]} grid]
         (set (contents (+ (* cols row) col)) x))))
@@ -279,11 +280,28 @@
   (defn map [{:contents contents :size size} f]
     {:contents (core/map f contents) :size size})
 
+  (defn clone [{:contents contents :size size}]
+    {:contents (array/slice contents) :size size})
+
   (defn top-left [_]
     [0 0])
 
   (defn bottom-right [{:size [rows cols]}]
-    [(- rows 1) (- cols 1)]))
+    [(- rows 1) (- cols 1)])
+
+  (defn print- [t &opt to-string]
+    (default to-string string)
+
+    (loop [:let [[rows cols] (t :size)]
+           row :range [0 rows] :after (print)
+           col :range [0 cols]
+           :let [pos [row col]]]
+      (prin (to-string (get- t pos)))))
+
+  (def get get-)
+  (def set set-)
+  (def print print-)
+  )
 
 (defn non [f] (fn [x] (not (f x))))
 
